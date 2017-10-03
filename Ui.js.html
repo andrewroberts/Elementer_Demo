@@ -1,0 +1,91 @@
+<script>
+
+var Ui = (function (ns) {
+
+  ns.settings = {};
+  
+  ns.doElementer = function() {
+
+    google.script.run
+      .withSuccessHandler(ns.createElementer)
+      .getMenu()
+  }
+
+  /**
+   *
+   */
+
+  ns.createElementer = function(menu) {
+  
+    console.log('menu: ' + JSON.stringify(menu))
+  
+    var setup = ns.getSetup(menu);
+
+    ns.settings.elementer = new Elementer()
+      .setMain('')
+      .setContainer('elementer-content')
+      .setRoot('elementer-root')
+      .setLayout(setup.layout)
+      .setDetail(setup.detail)
+      .build();
+    
+    var current = ns.settings.elementer.getCurrent()
+    console.log('Current Elements: ' + JSON.stringify(current))  
+      
+  }; // Ui.doElementer()
+
+  /**
+   *
+   */
+
+  ns.getSetup = function(menu) {
+
+    return {
+    
+      detail: {
+      
+        chooseTemplate: {
+          template: "dividerTemplate",
+          label: "Choose an option from the menu",
+        },
+     
+        newTaskTemplate: {
+          template: "selectTemplate",
+          label: "New task",
+          icon: "drafts",
+          options: menu,
+          values: {
+            value: menu[0]
+          },
+          on: {
+            change: function (elementer, branch, ob, e) {   
+              var newValue = elementer.getCurrent().newTaskTemplate
+              console.log(newValue)
+              google.script.run.gotValue(newValue)
+            }
+          }        
+        },                    
+      },
+      
+      layout: {
+        settings: {
+          prefix: "layout",
+          root: "root"
+        },
+        pages: {
+          root: {
+            label: "Settings",
+            items: ["chooseTemplate", "newTaskTemplate", "statusUpdate"]
+          }
+        }
+      }
+      
+    } // return
+    
+  }; // Ui.getSetUp()
+
+  return ns;
+  
+})(Ui || {});
+
+</script>
